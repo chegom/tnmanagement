@@ -122,20 +122,30 @@ class ExcelProcessor:
 
             df.rename(columns=col_mapping, inplace=True)
 
-        # 3. 받는사람 + 주소 기준으로 그룹화
+        # 3. 받는사람 + 주소 기준으로 그룹화 (순서 보장)
         if '받는사람' not in df.columns or '주소' not in df.columns:
             raise ValueError("필수 컬럼(받는사람, 주소)이 없습니다.")
 
-        # 그룹화 키 생성
-        df['_group_key'] = df['받는사람'].astype(str) + '|||' + df['주소'].astype(str)
+        # 그룹화를 직접 구현하여 원본 순서 100% 보장
+        seen_groups = {}  # {group_key: [행 인덱스들]}
+        group_order = []   # 그룹이 처음 등장한 순서
 
-        # 원본 순서 유지를 위해 원본 인덱스 저장
-        df['_original_index'] = df.index
+        for idx, row in df.iterrows():
+            group_key = str(row['받는사람']) + '|||' + str(row['주소'])
 
-        # 그룹별로 처리
+            if group_key not in seen_groups:
+                seen_groups[group_key] = []
+                group_order.append(group_key)
+
+            seen_groups[group_key].append(idx)
+
+        # 그룹 순서대로 처리
         result_rows = []
 
-        for group_key, group_df in df.groupby('_group_key', sort=False):
+        for group_key in group_order:
+            row_indices = seen_groups[group_key]
+            group_df = df.loc[row_indices]
+
             # 첫 번째 행의 기본 정보 유지
             first_row = group_df.iloc[0]
 
@@ -170,16 +180,12 @@ class ExcelProcessor:
                 '전화번호1': first_row['전화번호1'] if '전화번호1' in first_row else '',
                 '배송메시지': first_row['배송메시지'] if '배송메시지' in first_row and pd.notna(first_row['배송메시지']) else '',
                 '송장번호': '',  # K열: 빈 값
-                '_order': group_df['_original_index'].min()  # 원본 순서 유지용
             }
 
             result_rows.append(new_row)
 
-        # 4. 결과 DataFrame 생성
+        # 4. 결과 DataFrame 생성 (이미 순서가 보장됨)
         transformed_df = pd.DataFrame(result_rows)
-
-        # 원본 순서대로 정렬
-        transformed_df = transformed_df.sort_values('_order').reset_index(drop=True)
 
         # NaN을 빈 문자열로 변경
         transformed_df = transformed_df.fillna('')
