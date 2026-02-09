@@ -27,18 +27,8 @@ def main():
     """메인 애플리케이션"""
 
     # 헤더
-    st.title("📦 송장 관리 AI")
+    st.title("📦 다들림푸드 송장 관리 AI")
     st.markdown("---")
-
-    # 사이드바 - 사용 안내
-    with st.sidebar:
-        st.header("📖 사용 방법")
-        st.markdown("""
-        1. 엑셀 파일(.xlsx, .xls) 업로드
-        2. 원본 데이터 확인
-        3. 변환 버튼 클릭
-        4. 변환된 파일 다운로드
-        """)
 
     # 메인 컨텐츠
     col1, col2 = st.columns([1, 1])
