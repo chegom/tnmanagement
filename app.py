@@ -4,7 +4,6 @@ Streamlit 기반 웹 애플리케이션
 """
 import streamlit as st
 import pandas as pd
-from datetime import datetime
 from excel_processor import ExcelProcessor
 
 
@@ -40,8 +39,6 @@ def main():
         3. 변환 버튼 클릭
         4. 변환된 파일 다운로드
         """)
-        st.markdown("---")
-        st.caption(f"🕐 {datetime.now().strftime('%Y-%m-%d %H:%M')}")
 
     # 메인 컨텐츠
     col1, col2 = st.columns([1, 1])
