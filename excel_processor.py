@@ -129,8 +129,8 @@ class ExcelProcessor:
         # 그룹화 키 생성
         df['_group_key'] = df['받는사람'].astype(str) + '|||' + df['주소'].astype(str)
 
-        # 원본 순서 유지를 위해 첫 등장 인덱스 저장
-        df['_first_appearance'] = df.groupby('_group_key').cumcount()
+        # 원본 순서 유지를 위해 원본 인덱스 저장
+        df['_original_index'] = df.index
 
         # 그룹별로 처리
         result_rows = []
@@ -170,7 +170,7 @@ class ExcelProcessor:
                 '전화번호1': first_row['전화번호1'] if '전화번호1' in first_row else '',
                 '배송메시지': first_row['배송메시지'] if '배송메시지' in first_row and pd.notna(first_row['배송메시지']) else '',
                 '송장번호': '',  # K열: 빈 값
-                '_order': group_df['_first_appearance'].min()  # 원본 순서 유지용
+                '_order': group_df['_original_index'].min()  # 원본 순서 유지용
             }
 
             result_rows.append(new_row)
